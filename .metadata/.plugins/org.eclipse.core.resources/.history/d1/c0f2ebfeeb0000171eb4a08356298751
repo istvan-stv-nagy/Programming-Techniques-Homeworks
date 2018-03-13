@@ -1,0 +1,54 @@
+package model;
+
+public class Monomial implements Comparable {
+	
+	private int coefficient;
+	private int degree;
+	
+	public Monomial() {
+		this(0, 0);
+	}
+	
+	public Monomial(int coefficient, int degree) {
+		this.coefficient = coefficient;
+		this.degree = degree;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Monomial other = (Monomial) obj;
+		if (coefficient != other.coefficient)
+			return false;
+		if (degree != other.degree)
+			return false;
+		return true;
+	}
+	
+	public String toString() {
+		return coefficient + "X^" + degree + " "; 
+	}
+	
+	public int getCoefficient() {
+		return coefficient;
+	}
+	
+	public int getDegree() {
+		return degree;
+	}
+	
+	public void setCoefficient(int coefficient) {
+		this.coefficient = coefficient;
+	}
+
+	@Override
+	public int compareTo(Object arg0) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+}

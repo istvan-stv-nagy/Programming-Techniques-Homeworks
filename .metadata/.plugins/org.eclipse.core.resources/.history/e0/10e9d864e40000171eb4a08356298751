@@ -1,0 +1,21 @@
+package model;
+
+public class Test {
+
+	
+	public static void main(String args[]) {
+		Polynomial p = new Polynomial(3);
+		p.add(new Monomial(1, 2));
+		p.add(new Monomial(3, 1));
+		p.add(new Monomial(2, 0));
+		System.out.println("first pol : " + p.toString());
+		
+		Polynomial q = new Polynomial(2);
+		q.add(new Monomial(2, 1));
+		q.add(new Monomial(1, 0));
+		System.out.println("second pol : " + q.toString());
+		
+		System.out.println("sum = " +  p.add(q).toString());
+	}
+	
+}

@@ -1,0 +1,171 @@
+package presentation;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
+
+import javax.swing.JTable;
+
+import dao.AbstractDAO;
+import dao.CustomerDAO;
+import dao.ProductDAO;
+import model.Bill;
+import model.Customer;
+import model.Product;
+
+public class Controller {
+	
+	private View view;
+	private BtnListener btnListener;
+	private AbstractDAO<Customer> customerDAO = new CustomerDAO();
+	private AbstractDAO<Product> productDAO = new ProductDAO();
+	
+	private FileWriter fw = null;
+	private BufferedWriter bw = null;
+	
+	public Controller(View view) {
+		this.view = view;
+		btnListener = new BtnListener();
+		view.addBtnListener(btnListener);
+	}
+	
+	private JTable createTable(List<Object> objects) {
+		JTable table = null;
+		int numberOfColumns = objects.get(0).getClass().getDeclaredFields().length;
+		String columns[] = new String[numberOfColumns];
+		int i = 0;
+		for (Field field : objects.get(0).getClass().getDeclaredFields()) {
+			columns[i] = field.getName();
+			i++;
+		}
+		String data[][] = new String[objects.size()][numberOfColumns];
+		int row = 0;
+		for (Object obj : objects) {
+			int col = 0;
+			for (Field field : obj.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+				Object value;
+				try {
+					value = field.get(obj);
+					data[row][col] = value.toString();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				col++;
+			}
+			row++;
+		}
+		table = new JTable(data,columns);
+		return table;
+	}
+	
+	private Customer getSelectedCustomer(JTable table) {
+		int selectedRow = table.getSelectedRow();
+		int id = Integer.parseInt(table.getValueAt(selectedRow, 0).toString());
+		String name = table.getValueAt(selectedRow, 1).toString();
+		String tel = table.getValueAt(selectedRow, 2).toString();
+		return new Customer(id,name,tel);
+	}
+	
+	private Product getSelectedProduct(JTable table) {
+		int selectedRow = table.getSelectedRow();
+		int id = Integer.parseInt(table.getValueAt(selectedRow, 0).toString());
+		String name = table.getValueAt(selectedRow, 1).toString();
+		float price = Float.parseFloat(table.getValueAt(selectedRow, 2).toString());
+		int amount = Integer.parseInt(table.getValueAt(selectedRow, 3).toString());
+		float rating = Float.parseFloat(table.getValueAt(selectedRow, 4).toString());
+		int categoryID = Integer.parseInt(table.getValueAt(selectedRow, 5).toString());
+		return new Product(id,name,price,amount,rating,categoryID);
+	}
+	
+	class BtnListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			switch (e.getActionCommand()) {
+			case "insertcustomer" :
+				view.setNewInsertView(btnListener);
+				break;
+			case "insertcustomerconfirm" :
+				int id = Integer.parseInt(view.viewInsert.textId.getText());
+				String name = view.viewInsert.textName.getText();
+				String tel = view.viewInsert.textTel.getText();
+				CustomerDAO.insert(new Customer(id,name,tel));
+				view.viewInsert.dispose();
+				view.showMessage("Customer inserted successfully!");
+				break;
+			case "listcustomers" :
+				view.setTable(createTable(customerDAO.list()));
+				break;
+			case "deletecustomer" :
+				int selectedRow = view.getTable().getSelectedRow();
+				int idDeleted = Integer.parseInt(view.getTable().getValueAt(selectedRow, 0).toString());
+				CustomerDAO.delete((int)idDeleted);
+				view.setTable(createTable(customerDAO.list()));
+				view.showMessage("Customer deleted successfully!");
+				break;
+			case "editcustomer" :
+				int selected = view.getTable().getSelectedRow();
+				int idUpdate = Integer.parseInt(view.getTable().getValueAt(selected, 0).toString());
+				String nameUpdate = view.getTable().getValueAt(selected, 1).toString();
+				String telUpdate = view.getTable().getValueAt(selected, 2).toString();
+				CustomerDAO.edit(idUpdate, new Customer(idUpdate,nameUpdate,telUpdate));
+				view.setTable(createTable(customerDAO.list()));
+				view.showMessage("Customer updated successfully!");
+				break;
+			case "listproducts" :
+				view.setTable(createTable(productDAO.list()));
+				break;
+			case "understock" :
+				int minAmount = Integer.parseInt(view.getMinAmount());
+				view.setTable(createTable(ProductDAO.listUnderstock(minAmount)));
+				break;
+			case "placeorder" :
+				view.setNewOrderView(createTable(customerDAO.list()), createTable(productDAO.list()),btnListener);
+				break;
+			case "confirmorder" :
+				Customer selectedCustomer = getSelectedCustomer(view.viewOrder.getCustomerTable());
+				Product selectedProduct = getSelectedProduct(view.viewOrder.getProductsTable());
+				int amount = Integer.parseInt(view.viewOrder.getTextAmount());
+				if (amount <= selectedProduct.getAmount()) {
+					Bill bill = new Bill(selectedCustomer, selectedProduct, amount, new Date());
+					String generated = bill.generateBill();
+					view.showMessage(generated);
+					selectedProduct.setAmount(selectedProduct.getAmount() - amount);
+					ProductDAO.edit(selectedProduct.getIdproduct(), selectedProduct);
+					view.setTable(createTable(productDAO.list()));
+					view.viewOrder.setProductsTable(createTable(productDAO.list()));
+					try {
+						fw = new FileWriter("Bill_c" + selectedCustomer.getIdcustomer()+"_p" + selectedProduct.getIdproduct() + ".txt");
+						bw = new BufferedWriter(fw);
+						for (int i=0; i<generated.length(); i++) {
+							if (generated.charAt(i) == '\n')
+								bw.newLine();
+							else
+								bw.write(generated.charAt(i));
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					} finally {
+						try {
+							if (bw != null)
+								bw.close();
+							if (fw != null)
+								fw.close();
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
+					}
+				} else {
+					view.showMessage("Order count not be completed due to UNDERSTOCK!");
+				}
+				break;
+			}
+		}
+	}
+}

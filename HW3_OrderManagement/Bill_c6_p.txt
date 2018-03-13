@@ -1,0 +1,7 @@
+BILL
+Date of the order	: Tue Apr 18 16:36:43 EEST 2017
+Customer details	: Customer [idcustomer=6, name=Michaelllo, tel=0747526398]
+Product [id=3, name=Huawei, price=15.55, amount=1, rating=7.6, categoryID=3]	31.1$
+Product [id=8, name=Lenovoo, price=52.54, amount=1, rating=9.2, categoryID=2]	52.54$
+Product [id=159, name=Hama OpticalMouse, price=14.5, amount=11, rating=9.4, categoryID=1]	72.5$
+Total price		: 156.14

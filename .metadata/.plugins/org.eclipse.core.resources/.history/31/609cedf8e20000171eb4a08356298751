@@ -1,0 +1,29 @@
+package model;
+
+import java.util.ArrayList;
+
+public class Polynomial {
+	
+	private ArrayList<Monomial> monomials;
+	
+	public Polynomial(int degree) {
+		this.monomials = new ArrayList<Monomial>(degree);
+	}
+	
+	public void add(Monomial monomial) {
+		int index = monomial.getDegree();
+		monomials.set(index, new Monomial(monomial.getCoefficient() + monomials.get(index).getCoefficient(), index));
+		//monomials.get(monomial.getDegree()) += monomial.getCoefficient();
+	}
+	
+	public Polynomial add(Polynomial a) {
+		Polynomial result = this;
+		
+		for (Monomial m : a.monomials) {
+			result.add(m);
+		}
+		
+		return result;
+	}
+	
+}

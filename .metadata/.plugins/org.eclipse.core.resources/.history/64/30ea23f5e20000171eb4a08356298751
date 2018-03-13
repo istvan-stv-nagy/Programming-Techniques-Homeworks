@@ -1,0 +1,20 @@
+package model;
+
+public class Monomial {
+	
+	private int coefficient;
+	private int degree;
+	
+	public Monomial() {
+		this(0, 0);
+	}
+	
+	public Monomial(int coefficient, int degree) {
+		this.coefficient = coefficient;
+		this.degree = degree;
+	}
+	
+	public String toString() {
+		return coefficient + "X^" + degree + " "; 
+	}
+}

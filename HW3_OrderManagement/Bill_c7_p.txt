@@ -1,0 +1,6 @@
+BILL
+Date of the order	: Tue Apr 18 16:54:56 EEST 2017
+Customer details	: Customer [idcustomer=7, name=Pityuka, tel=0745896518]
+Product [id=7, name=Asus, price=99.99, amount=5, rating=9.7, categoryID=1]	399.96$
+Product [id=159, name=Hama OpticalMouse, price=14.5, amount=8, rating=9.4, categoryID=1]	43.5$
+Total price		: 443.46
